@@ -1,7 +1,9 @@
 library media_gallery;
 
 import 'dart:async';
+
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -33,12 +35,12 @@ class MediaGallery {
 
   static Future<MediaPage> _listMedias({
     @required MediaCollection? collection,
-    MediaType? mediaType,
-    int? skip,
-    int? take,
+    MediaType mediaType = MediaType.image,
+    int skip = 0,
+    int take = 0,
   }) async {
     assert(collection?.id != null);
-    mediaType ??= MediaType.image;
+    mediaType = MediaType.image;
     final json = await _channel.invokeMethod('listMedias', {
       'collectionId': collection?.id ?? '',
       'skip': skip,
@@ -48,13 +50,12 @@ class MediaGallery {
     return MediaPage.fromJson(collection, mediaType, json);
   }
 
-  static Future<List<int>> _getMediaThumbnail({
-    @required String? mediaId,
-    MediaType? mediaType,
-    int? width,
-    int? height,
-    bool? highQuality,
-  }) async {
+  static Future<List<int>> _getMediaThumbnail(
+      {@required String? mediaId,
+      MediaType? mediaType,
+      int width = 120,
+      int height = 240,
+      bool highQuality = false}) async {
     assert(mediaId != null);
     final bytes = await _channel.invokeMethod('getMediaThumbnail', {
       'mediaId': mediaId,
@@ -85,9 +86,6 @@ class MediaGallery {
   static Future<File> _getMediaFile({
     @required String? mediaId,
     MediaType? mediaType,
-    int? width,
-    int? height,
-    bool? highQuality,
   }) async {
     assert(mediaId != null);
     mediaType ??= MediaType.image;
