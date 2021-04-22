@@ -2,19 +2,20 @@ part of media_gallery;
 
 /// Fetches the given media thumbnail from the gallery.
 class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
-  const MediaThumbnailProvider({
+  MediaThumbnailProvider({
     @required this.media,
   }) : assert(media != null);
 
-  final Media media;
+  Media? media;
 
   @override
   ImageStreamCompleter load(key, decode) {
+    // ignore: unnecessary_null_comparison
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${media?.id}');
+        yield ErrorDescription('Id: ${media!.id}');
       },
     );
   }
@@ -22,10 +23,13 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   Future<ui.Codec> _loadAsync(
       MediaThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final bytes = await media.getThumbnail();
-    if (bytes.length == 0) return null;
+    final bytes = await media!.getThumbnail();
+    if (bytes.length == 0) return decode(Uint8List(0));
 
-    return await decode(bytes);
+    if (bytes is Uint8List) {
+      return await decode(bytes);
+    }
+    return decode(Uint8List(0));
   }
 
   @override
@@ -37,24 +41,24 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final MediaThumbnailProvider typedOther = other;
-    return media?.id == typedOther.media?.id;
+    return media!.id == typedOther.media!.id;
   }
 
   @override
-  int get hashCode => media?.id?.hashCode ?? 0;
+  int get hashCode => media!.id.hashCode;
 
   @override
-  String toString() => '$runtimeType("${media?.id}")';
+  String toString() => '$runtimeType("${media!.id}")';
 }
 
 /// Fetches the given media collection thumbnail from the gallery.
 class MediaCollectionThumbnailProvider
     extends ImageProvider<MediaCollectionThumbnailProvider> {
-  const MediaCollectionThumbnailProvider({
+  MediaCollectionThumbnailProvider({
     @required this.collection,
   }) : assert(collection != null);
 
-  final MediaCollection collection;
+  MediaCollection? collection;
 
   @override
   ImageStreamCompleter load(key, decode) {
@@ -62,7 +66,7 @@ class MediaCollectionThumbnailProvider
       codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${collection?.id}');
+        yield ErrorDescription('Id: ${collection!.id ?? 0}');
       },
     );
   }
@@ -70,10 +74,12 @@ class MediaCollectionThumbnailProvider
   Future<ui.Codec> _loadAsync(
       MediaCollectionThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final bytes = await collection.getThumbnail();
-    if (bytes == null || bytes.length == 0) return null;
-
-    return await decode(bytes);
+    final bytes = await collection!.getThumbnail();
+    if (bytes.length == 0) return decode(Uint8List(0));
+    if (bytes is Uint8List) {
+      return await decode(bytes);
+    }
+    return decode(Uint8List(0));
   }
 
   @override
@@ -86,14 +92,17 @@ class MediaCollectionThumbnailProvider
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final MediaCollectionThumbnailProvider typedOther = other;
-    return collection?.id == typedOther.collection?.id;
+    if (collection != null && typedOther.collection != null) {
+      return collection!.id == typedOther.collection!.id;
+    }
+    return false;
   }
 
   @override
-  int get hashCode => collection?.id?.hashCode ?? 0;
+  int get hashCode => collection?.id.hashCode ?? 0;
 
   @override
-  String toString() => '$runtimeType("${collection?.id}")';
+  String toString() => '$runtimeType("${collection!.id ?? 0}")';
 }
 
 /// Fetches the given media image thumbnail from the gallery.
@@ -103,9 +112,9 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   MediaImageProvider({
     @required this.media,
   })  : assert(media != null),
-        assert(media.mediaType == MediaType.image);
+        assert(media!.mediaType == MediaType.image);
 
-  final Media media;
+  Media? media;
 
   @override
   ImageStreamCompleter load(key, decode) {
@@ -113,7 +122,7 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
       codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${media?.id}');
+        yield ErrorDescription('Id: ${media?.id ?? 0}');
       },
     );
   }
@@ -121,12 +130,13 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   Future<ui.Codec> _loadAsync(
       MediaImageProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final file = await media.getFile();
-    if (file == null) return null;
+    final file = await media!.getFile();
+    // ignore: unnecessary_null_comparison
+    if (file == null) return decode(Uint8List(0));
 
     final bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0) return null;
 
+    if (bytes.lengthInBytes == 0) return await decode(Uint8List(0));
     return await decode(bytes);
   }
 
@@ -139,12 +149,14 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final MediaImageProvider typedOther = other;
-    return media?.id == typedOther.media?.id;
+    if (media != null && typedOther.media != null)
+      return media!.id == typedOther.media!.id;
+    return false;
   }
 
   @override
-  int get hashCode => media?.id?.hashCode ?? 0;
+  int get hashCode => media?.id.hashCode ?? 0;
 
   @override
-  String toString() => '$runtimeType("${media?.id}")';
+  String toString() => '$runtimeType("${media!.id}")';
 }
