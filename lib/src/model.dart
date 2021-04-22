@@ -32,9 +32,9 @@ class MediaCollection {
   }) {
     return MediaGallery._listMedias(
       collection: this,
-      mediaType: mediaType,
-      skip: skip,
-      take: take,
+      mediaType: mediaType = MediaType.image,
+      skip: skip = 0,
+      take: take = 0,
     );
   }
 
@@ -57,8 +57,9 @@ class MediaCollection {
 
 /// A list of medias with pagination support.
 @immutable
+// ignore: must_be_immutable
 class MediaPage {
-  final MediaCollection collection;
+  MediaCollection? collection;
 
   /// The media type of [items].
   final MediaType mediaType;
@@ -127,14 +128,14 @@ class Media {
 
   /// Get a JPEG thumbnail's data for this media.
   Future<List<int>> getThumbnail({
-    int width,
-    int height,
+    int? width,
+    int? height,
     bool highQuality = false,
   }) {
     return MediaGallery._getMediaThumbnail(
       mediaId: id,
-      width: width,
-      height: height,
+      width: width ?? 120,
+      height: height ?? 240,
       mediaType: mediaType,
       highQuality: highQuality,
     );
