@@ -15,7 +15,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${media!.id}');
+        yield ErrorDescription('Id: ${media?.id ?? 0}');
       },
     );
   }
@@ -23,13 +23,15 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   Future<ui.Codec> _loadAsync(
       MediaThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final bytes = await media!.getThumbnail();
-    if (bytes.length == 0) return decode(Uint8List(0));
+    if (media != null) {
+      final bytes = await media!.getThumbnail();
+      if (bytes.length == 0) return decode(Uint8List(0));
 
-    if (bytes is Uint8List) {
-      return await decode(bytes);
+      if (bytes is Uint8List) {
+        return await decode(bytes);
+      }
     }
-    return decode(Uint8List(0));
+    return await decode(Uint8List(0));
   }
 
   @override
@@ -41,14 +43,17 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final MediaThumbnailProvider typedOther = other;
-    return media!.id == typedOther.media!.id;
+    if (media != null && typedOther.media != null) {
+      return media!.id == typedOther.media!.id;
+    }
+    return false;
   }
 
   @override
   int get hashCode => media!.id.hashCode;
 
   @override
-  String toString() => '$runtimeType("${media!.id}")';
+  String toString() => '$runtimeType("${media?.id ?? 0}")';
 }
 
 /// Fetches the given media collection thumbnail from the gallery.
@@ -66,7 +71,7 @@ class MediaCollectionThumbnailProvider
       codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${collection!.id ?? 0}');
+        yield ErrorDescription('Id: ${collection?.id ?? 0}');
       },
     );
   }
@@ -74,12 +79,14 @@ class MediaCollectionThumbnailProvider
   Future<ui.Codec> _loadAsync(
       MediaCollectionThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final bytes = await collection!.getThumbnail();
-    if (bytes.length == 0) return decode(Uint8List(0));
-    if (bytes is Uint8List) {
-      return await decode(bytes);
+    if (collection != null) {
+      final bytes = await collection!.getThumbnail();
+      if (bytes.length == 0) return decode(Uint8List(0));
+      if (bytes is Uint8List) {
+        return await decode(bytes);
+      }
     }
-    return decode(Uint8List(0));
+    return await decode(Uint8List(0));
   }
 
   @override
@@ -102,7 +109,7 @@ class MediaCollectionThumbnailProvider
   int get hashCode => collection?.id.hashCode ?? 0;
 
   @override
-  String toString() => '$runtimeType("${collection!.id ?? 0}")';
+  String toString() => '$runtimeType("${collection?.id ?? 0}")';
 }
 
 /// Fetches the given media image thumbnail from the gallery.
@@ -130,14 +137,17 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   Future<ui.Codec> _loadAsync(
       MediaImageProvider key, DecoderCallback decode) async {
     assert(key == this);
-    final file = await media!.getFile();
-    // ignore: unnecessary_null_comparison
-    if (file == null) return decode(Uint8List(0));
+    if (media != null) {
+      final file = await media!.getFile();
+      // ignore: unnecessary_null_comparison
+      if (file == null) return decode(Uint8List(0));
 
-    final bytes = await file.readAsBytes();
+      final bytes = await file.readAsBytes();
 
-    if (bytes.lengthInBytes == 0) return await decode(Uint8List(0));
-    return await decode(bytes);
+      if (bytes.lengthInBytes == 0) return await decode(Uint8List(0));
+      return await decode(bytes);
+    }
+    return await decode(Uint8List(0));
   }
 
   @override
@@ -158,5 +168,5 @@ class MediaImageProvider extends ImageProvider<MediaImageProvider> {
   int get hashCode => media?.id.hashCode ?? 0;
 
   @override
-  String toString() => '$runtimeType("${media!.id}")';
+  String toString() => '$runtimeType("${media?.id ?? 0}")';
 }
