@@ -4,13 +4,13 @@ part of media_gallery;
 @immutable
 class MediaCollection {
   /// A unique identifier for the collection.
-  final String id;
+  String? id;
 
   /// The name of the collection.
-  final String name;
+  String? name;
 
   /// The total number of medias in the collection.
-  final int count;
+  int? count;
 
   /// Indicates whether this collection contains all medias.
   bool get isAllCollection => id == "__ALL__";
@@ -26,9 +26,9 @@ class MediaCollection {
   /// Pagination can be controlled out of [skip] (defaults to `0`) and
   /// [take] (defaults to `<total>`).
   Future<MediaPage> getMedias({
-    MediaType mediaType,
-    int skip,
-    int take,
+    MediaType? mediaType,
+    int? skip,
+    int? take,
   }) {
     return MediaGallery._listMedias(
       collection: this,
@@ -42,14 +42,14 @@ class MediaCollection {
   ///
   /// It will display the lastly taken media thumbnail.
   Future<List<int>> getThumbnail({
-    int width,
-    int height,
+    int? width,
+    int? height,
     bool highQuality = false,
   }) {
     return MediaGallery._getCollectionThumbnail(
-      collectionId: id,
-      width: width,
-      height: height,
+      collectionId: id ?? '',
+      width: width ?? 120,
+      height: height ?? 240,
       highQuality: highQuality,
     );
   }

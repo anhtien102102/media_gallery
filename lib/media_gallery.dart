@@ -20,11 +20,11 @@ class MediaGallery {
   /// List all available media gallery collections and counts number of
   /// items of [mediaTypes].
   static Future<List<dynamic>> listMediaCollections({
-    @required List<MediaType> mediaTypes,
+    @required List<MediaType>? mediaTypes,
   }) async {
     assert(mediaTypes != null);
     final json = await _channel.invokeMethod('listMediaCollections', {
-      'mediaTypes': mediaTypes.map((x) => _mediaTypeToJson(x)).toList(),
+      'mediaTypes': mediaTypes?.map((x) => _mediaTypeToJson(x)).toList() ?? [],
     });
     return json
         .map<MediaCollection>((x) => MediaCollection.fromJson(x))
@@ -32,15 +32,15 @@ class MediaGallery {
   }
 
   static Future<MediaPage> _listMedias({
-    @required MediaCollection collection,
-    MediaType mediaType,
-    int skip,
-    int take,
+    @required MediaCollection? collection,
+    MediaType? mediaType,
+    int? skip,
+    int? take,
   }) async {
-    assert(collection.id != null);
+    assert(collection?.id != null);
     mediaType ??= MediaType.image;
     final json = await _channel.invokeMethod('listMedias', {
-      'collectionId': collection.id,
+      'collectionId': collection?.id ?? '',
       'skip': skip,
       'take': take,
       'mediaType': _mediaTypeToJson(mediaType),
@@ -49,11 +49,11 @@ class MediaGallery {
   }
 
   static Future<List<int>> _getMediaThumbnail({
-    @required String mediaId,
-    MediaType mediaType,
-    int width,
-    int height,
-    bool highQuality,
+    @required String? mediaId,
+    MediaType? mediaType,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(mediaId != null);
     final bytes = await _channel.invokeMethod('getMediaThumbnail', {
@@ -61,16 +61,16 @@ class MediaGallery {
       'width': width,
       'height': height,
       'highQuality': highQuality,
-      'mediaType': _mediaTypeToJson(mediaType),
+      'mediaType': _mediaTypeToJson(mediaType ?? MediaType.image),
     });
     return bytes;
   }
 
   static Future<List<int>> _getCollectionThumbnail({
-    @required String collectionId,
-    int width,
-    int height,
-    bool highQuality,
+    @required String? collectionId,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(collectionId != null);
     final bytes = await _channel.invokeMethod('getCollectionThumbnail', {
@@ -83,11 +83,11 @@ class MediaGallery {
   }
 
   static Future<File> _getMediaFile({
-    @required String mediaId,
-    MediaType mediaType,
-    int width,
-    int height,
-    bool highQuality,
+    @required String? mediaId,
+    MediaType? mediaType,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(mediaId != null);
     mediaType ??= MediaType.image;
